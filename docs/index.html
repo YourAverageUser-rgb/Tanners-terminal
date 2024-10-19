@@ -10,6 +10,89 @@
             color: limegreen;
             font-family: monospace;
         }
+        #terminal {
+            white-space: pre-wrap;
+        }
+        input {
+            background-color: black;
+            color: limegreen;
+            border: none;
+            font-family: monospace;
+            width: 100%;
+        }
+    </style>
+</head>
+<body onload="brython()">
+    <h1>Welcome to Tanner's Terminal</h1>
+    <div id="terminal"></div>
+    <form id="commandForm">
+        <input type="text" id="commandInput" placeholder="Enter command..." autocomplete="off" />
+    </form>
+
+    <script type="text/python">
+        import random, time, sys, base64
+
+        # ANSI escape sequences for lime green text and reset
+        LIME_GREEN = "<span style='color:limegreen;'>"
+        RESET_COLOR = "</span>"
+
+        # Function to animate typing of a message
+        def animated_typing(message):
+            terminal = document["terminal"]
+            for char in message:
+                terminal.innerHTML += char
+                time.sleep(0.05)
+
+        # Fun data (hidden in encrypted form)
+        encrypted_jokes = base64.b64encode("Why do programmers prefer dark mode? Because the light attracts bugs!|There are 10 types of people in the world: those who understand binary and those who don’t.|How many programmers does it take to change a lightbulb? None, that’s a hardware problem!".encode()).decode()
+
+        # Function to decrypt and reveal jokes
+        def joke():
+            jokes = decrypt_data(encrypted_jokes).split('|')
+            print(random.choice(jokes))
+
+        # Function to decrypt data
+        def decrypt_data(encoded_string):
+            return base64.b64decode(encoded_string).decode()
+
+        # Handle command input
+        def handle_command(event):
+            event.preventDefault()  # Prevent form from refreshing the page
+            command = document["commandInput"].value.strip().lower()
+            terminal = document["terminal"]
+
+            # Clear the input field
+            document["commandInput"].value = ""
+
+            # Process commands
+            if command == "help":
+                terminal.innerHTML += f"{LIME_GREEN}Commands: help, joke, exit{RESET_COLOR}\n"
+            elif command == "joke":
+                terminal.innerHTML += f"{LIME_GREEN}{random.choice(jokes)}{RESET_COLOR}\n"
+            elif command == "exit":
+                terminal.innerHTML += f"{LIME_GREEN}Goodbye!{RESET_COLOR}\n"
+            else:
+                terminal.innerHTML += f"{LIME_GREEN}Unknown command. Type 'help'.{RESET_COLOR}\n"
+
+        # Bind form submission to handle_command
+        document["commandForm"].bind("submit", handle_command)
+
+        # Initial message
+        animated_typing("Welcome to Tanner's Terminal! Type 'help' for commands.\n")
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tanner's Terminal</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython.min.js"></script>
+    <style>
+        body {
+            background-color: black;
+            color: limegreen;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body onload="brython()">
