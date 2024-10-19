@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tanner's Terminal</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython.min.js"></script>
+    <style>
+        body {
+            background-color: black;
+            color: limegreen;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body onload="brython()">
+    <h1>Welcome to Tanner's Terminal</h1>
+    <div id="output"></div>
+    <script type="text/python">
+        import random, time, sys, base64
+
+# ANSI escape sequences for lime green text and reset
+LIME_GREEN = "\033[92m"
+RESET_COLOR = "\033[0m"
+
+# Function to animate typing of a message with a blinking cursor
+def animated_typing(message):
+    sys.stdout.write(LIME_GREEN)
+    for char in message:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(0.1)
+        sys.stdout.write("_")  # Blinking cursor effect
+        sys.stdout.flush()
+        time.sleep(0.1)
+        sys.stdout.write("\b")  # Remove cursor
+    sys.stdout.write(RESET_COLOR)
+
+# Function to display "Property of Tanner Ernst" at the top-right corner of the terminal
+def display_property_of():
+    sys.stdout.write(f"\033[2;60H{LIME_GREEN}Property of Tanner Ernst{RESET_COLOR}\n")  # ANSI code for moving to top-right corner
+
+# Function to decrypt hidden data (using base64 for simplicity)
+def decrypt_data(encoded_string):
+    return base64.b64decode(encoded_string).decode()
+
+# Fun data (hidden in encrypted form)
+encrypted_jokes = base64.b64encode("Why do programmers prefer dark mode? Because the light attracts bugs!|There are 10 types of people in the world: those who understand binary and those who don’t.|How many programmers does it take to change a lightbulb? None, that’s a hardware problem!".encode()).decode()
+encrypted_rickroll_lyrics = base64.b64encode("Never gonna give you up|Never gonna let you down|Never gonna run around|And desert you|Never gonna make you cry|Never gonna say goodbye|Never gonna tell a lie|And hurt you".encode()).decode()
+
+# Function to decrypt and reveal jokes
+def joke():
+    jokes = decrypt_data(encrypted_jokes).split('|')
+    print(f"\n{LIME_GREEN}{random.choice(jokes)}{RESET_COLOR}\n")
+
+# Function to decrypt and reveal Rickroll lyrics with binary animation
+def rickroll():
+    lyrics = decrypt_data(encrypted_rickroll_lyrics).split('|')
+    print(f"\n{LIME_GREEN}[Binary Rickroll in progress...]{RESET_COLOR}\n")
+    for line in lyrics:
+        for _ in range(5):  # 5 cycles of binary animation per lyric
+            print(f"{LIME_GREEN}{''.join(random.choice('01') for _ in range(50))}{RESET_COLOR}")  # Show 50 random 1s and 0s
+            time.sleep(0.1)
+        print(f"\n{LIME_GREEN}{line}...{RESET_COLOR}\n")  # Finally reveal the lyric
+        time.sleep(0.5)
+
+# Other simple commands for fun
+def cat(): print(f"\n{LIME_GREEN} |\---/|   \n | o_o |  _____ \n  \_^_/  |coder| \n /     \ | cat | \n/  | |  \|_____| {RESET_COLOR}\n")
+def flip(text): print(f"\n{LIME_GREEN}{text[::-1].translate(str.maketrans('abcdefghijklmnopqrstuvwxyz', 'ɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎz'))[::-1]}{RESET_COLOR}\n")
+def reverse(text): print(f"\n{LIME_GREEN}{text[::-1]}{RESET_COLOR}\n")
+def clear(): print("\033[H\033[J")
+
+# Command interpreter
+def run_command(command, arg=None):
+    if command == "cat": cat()
+    elif command == "joke": joke()
+    elif command == "rickroll": rickroll()
+    elif command == "flip": flip(arg)
+    elif command == "reverse": reverse(arg)
+    elif command == "clear": clear()
+    else: print(f"{LIME_GREEN}Unknown command. Type 'help'.{RESET_COLOR}")
+
+# Main loop
+if __name__ == "__main__":
+    clear()
+    display_property_of()
+    animated_typing("Welcome to Tanner's Terminal! Type 'help' for a list of commands.\n")
+    
+    while True:
+        user_input = input(f"\n{LIME_GREEN}Enter command: {RESET_COLOR}").split(maxsplit=1)
+        cmd = user_input[0].lower()
+        arg = user_input[1] if len(user_input) > 1 else None
+
+        if cmd == "help":
+            print(f"\n{LIME_GREEN}commands: List all available commands\njoke: Display a joke\ncat: Show a coder cat\n"
+                  "flip: Flip a message upside down\nreverse: Reverse a message\nclear: Clear the terminal\n"
+                  "rickroll: Play a binary rickroll\nexit: Exit terminal{RESET_COLOR}\n")
+        elif cmd == "exit":
+            print(f"{LIME_GREEN}Goodbye!{RESET_COLOR}")
+            break
+        else:
+            run_command(cmd, arg)
+    </script>
+</body>
+</html>
