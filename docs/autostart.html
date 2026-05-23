@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boot PC straight into Xbox — Setup Guide</title>
+    <style>
+        :root {
+            --xbg: #0e1116;
+            --xgreen: #16c60c;
+            --xtext: #f3f6f9;
+            --xdim: #9aa4b2;
+            --xpanel: rgba(255,255,255,0.05);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background:
+                radial-gradient(900px 700px at 90% -10%, rgba(22,198,12,0.12), transparent 60%),
+                #0a0d12;
+            color: var(--xtext);
+            font-family: "Segoe UI", system-ui, sans-serif;
+            line-height: 1.55;
+            padding: 40px 20px 80px;
+        }
+        .wrap { max-width: 880px; margin: 0 auto; }
+        .crumb { color: var(--xdim); font-size: 13px; margin-bottom: 6px; }
+        .crumb a { color: var(--xgreen); }
+        h1 { font-size: 36px; margin: 0 0 8px; font-weight: 600; }
+        h2 { font-size: 22px; margin: 36px 0 12px; }
+        h3 { font-size: 16px; margin: 20px 0 6px; color: var(--xgreen); }
+        p { color: var(--xtext); }
+        .sub { color: var(--xdim); margin-bottom: 24px; font-size: 15px; }
+        .card {
+            background: var(--xpanel);
+            border-radius: 14px;
+            padding: 22px 24px;
+            margin: 14px 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        pre {
+            background: #050709;
+            color: #c8f4c8;
+            padding: 14px 16px;
+            border-radius: 10px;
+            overflow-x: auto;
+            border-left: 3px solid var(--xgreen);
+            font-size: 13px;
+            margin: 8px 0;
+        }
+        code { background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+        .pill { display: inline-block; padding: 2px 10px; background: rgba(22,198,12,0.2); color: var(--xgreen); border-radius: 999px; font-size: 12px; }
+        ol li, ul li { margin-bottom: 6px; }
+        .back {
+            display: inline-block;
+            background: var(--xgreen); color: white; padding: 10px 18px;
+            border-radius: 8px; margin-bottom: 24px; font-weight: 600;
+        }
+        kbd {
+            background: rgba(255,255,255,0.1); padding: 1px 8px; border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.15);
+            font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+        }
+        .copy-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+        .copy-btn {
+            background: var(--xgreen); color: white; border: none;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px;
+        }
+        details > summary { cursor: pointer; padding: 10px 0; font-weight: 600; color: var(--xgreen); }
+        .note { color: var(--xdim); font-size: 13px; padding-left: 12px; border-left: 2px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="crumb"><a href="xbox.html">← Xbox dashboard</a></div>
+    <h1>Boot your PC straight into Xbox</h1>
+    <p class="sub">Make this dashboard launch on Windows sign-in so flipping on the PC feels like turning on a console.</p>
+    <a class="back" href="xbox.html">▶ Open the dashboard</a>
+
+    <div class="card">
+        <h2>Quick path · Browser kiosk on startup</h2>
+        <p>If you just want to fly: a one-line shortcut that opens Chrome or Edge fullscreen on this dashboard at every sign-in.</p>
+
+        <h3>1 · Create the shortcut</h3>
+        <p>Press <kbd>Win + R</kbd>, paste this, and press Enter:</p>
+        <pre id="cmd1">shell:startup</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd1">Copy</button><span class="note">Opens the Windows Startup folder.</span></div>
+
+        <h3>2 · Drop a startup .bat in that folder</h3>
+        <p>Right-click → <em>New → Text Document</em>, name it <code>xbox.bat</code>, then paste one of these:</p>
+
+        <p><strong>Microsoft Edge (recommended):</strong></p>
+        <pre id="cmd2">start msedge --kiosk "https://youraverageuser-rgb.github.io/Tanners-terminal/xbox.html" --edge-kiosk-type=fullscreen</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd2">Copy</button></div>
+
+        <p><strong>Google Chrome:</strong></p>
+        <pre id="cmd3">start chrome --kiosk "https://youraverageuser-rgb.github.io/Tanners-terminal/xbox.html"</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd3">Copy</button></div>
+
+        <h3>3 · Test it</h3>
+        <p>Sign out and back in. Windows should jump straight to the Xbox dashboard, fullscreen. Press <kbd>Alt+F4</kbd> or <kbd>Win+D</kbd> to escape kiosk mode if needed.</p>
+    </div>
+
+    <div class="card">
+        <h2>Best path · Native app with Electron</h2>
+        <p>For real Xbox-like polish (no browser chrome, real autostart in Windows, controller passthrough, file system access for scanning installed games), wrap it as an Electron app.</p>
+
+        <h3>1 · Scaffold</h3>
+        <pre id="cmd4">npm init -y
+npm install --save-dev electron
+npm install --save electron-store auto-launch</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd4">Copy</button></div>
+
+        <h3>2 · main.js</h3>
+        <pre id="cmd5">const { app, BrowserWindow } = require('electron');
+const path = require('path');
+const AutoLaunch = require('auto-launch');
+
+const xboxLauncher = new AutoLaunch({ name: 'Xbox PC' });
+xboxLauncher.enable().catch(() => {});
+
+function createWindow() {
+    const win = new BrowserWindow({
+        width: 1600,
+        height: 900,
+        fullscreen: true,
+        frame: false,
+        backgroundColor: '#0a0d12',
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
+            nodeIntegration: false
+        }
+    });
+    win.loadFile('docs/xbox.html');
+    win.setMenuBarVisibility(false);
+}
+
+app.whenReady().then(createWindow);
+app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd5">Copy</button></div>
+
+        <h3>3 · package.json scripts</h3>
+        <pre id="cmd6">"main": "main.js",
+"scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+}</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd6">Copy</button></div>
+
+        <h3>4 · Real game scanning (preload.js)</h3>
+        <p>This is what makes the auto-scan actually find your installed Xbox app games. Expose a renderer-safe API that scans the standard install paths:</p>
+        <pre id="cmd7">// preload.js
+const { contextBridge, ipcRenderer } = require('electron');
+const fs = require('fs');
+const path = require('path');
+
+const XBOX_PATHS = [
+    'C:\\\\XboxGames',                  // Xbox app default on Windows
+    'C:\\\\Program Files\\\\WindowsApps' // UWP / Game Pass
+];
+
+contextBridge.exposeInMainWorld('XboxNative', {
+    scanInstalled: () => {
+        const games = [];
+        for (const root of XBOX_PATHS) {
+            try {
+                if (!fs.existsSync(root)) continue;
+                for (const entry of fs.readdirSync(root)) {
+                    const full = path.join(root, entry);
+                    try {
+                        const stat = fs.statSync(full);
+                        if (stat.isDirectory()) games.push({
+                            id: entry,
+                            title: entry.replace(/_.+$/, '').replace(/\\./g,' '),
+                            path: full,
+                            sizeBytes: dirSize(full)
+                        });
+                    } catch(e) {}
+                }
+            } catch(e) {}
+        }
+        return games;
+    }
+});
+
+function dirSize(p) {
+    try {
+        let s = 0;
+        for (const f of fs.readdirSync(p)) {
+            const fp = path.join(p, f);
+            const st = fs.statSync(fp);
+            s += st.isDirectory() ? dirSize(fp) : st.size;
+        }
+        return s;
+    } catch(e) { return 0; }
+}</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd7">Copy</button></div>
+
+        <p class="note">Then in <code>xbox.js</code>, if <code>window.XboxNative</code> exists, call <code>XboxNative.scanInstalled()</code> in <code>runScan()</code> and merge the results into the library. The web build falls back to the mock data.</p>
+
+        <h3>5 · Build the installer</h3>
+        <pre id="cmd8">npx electron-builder --win nsis</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd8">Copy</button></div>
+
+        <p>The installer registers Xbox PC in Windows Startup so the next reboot opens straight into the dashboard. Add <code>app.setLoginItemSettings({ openAtLogin: true })</code> to be doubly sure.</p>
+    </div>
+
+    <div class="card">
+        <h2>Launching real games from the dashboard</h2>
+        <p>Xbox app installs put games inside <code>C:\XboxGames\&lt;Title&gt;\Content</code> with a <code>MicrosoftGame.config</code> file. To launch, spawn the executable from main.js:</p>
+        <pre id="cmd9">const { spawn } = require('child_process');
+ipcMain.handle('launch-game', (_, exePath) => {
+    spawn(exePath, [], { detached: true, stdio: 'ignore' }).unref();
+});</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd9">Copy</button></div>
+        <p>Game Pass / UWP titles need the <code>shell:appsFolder</code> trick:</p>
+        <pre id="cmd10">explorer.exe shell:appsFolder\Microsoft.624F8B84B80_8wekyb3d8bbwe!Game</pre>
+        <div class="copy-row"><button class="copy-btn" data-copy="cmd10">Copy</button></div>
+    </div>
+
+    <div class="card">
+        <h2>Party / messaging real integration</h2>
+        <p>The web build simulates parties and messages locally. To wire to actual Xbox Live presence and friends, you need to OAuth against Microsoft and call the Xbox Live REST API.</p>
+        <ul>
+            <li><strong>Auth</strong>: Microsoft identity platform → XSTS token → XUID</li>
+            <li><strong>Friends list</strong>: <code>GET https://peoplehub.xboxlive.com/users/me/people</code></li>
+            <li><strong>Presence</strong>: <code>GET https://userpresence.xboxlive.com/users/xuid({xuid})/presence</code></li>
+            <li><strong>Messages</strong>: <code>POST https://xblmessaging.xboxlive.com/network/...</code></li>
+        </ul>
+        <p class="note">Xbox doesn't publish a free public party-voice API — but for a fan launcher you can route party voice through Discord with the Discord Rich Presence + Voice SDK and overlay it inside this UI.</p>
+    </div>
+
+    <div class="card">
+        <h2>Controller setup</h2>
+        <p>This dashboard reads the standard Gamepad API, so any Xbox controller plugged in over USB or paired over Bluetooth works out of the box. The buttons map exactly the same as a Series X|S console:</p>
+        <ul>
+            <li><strong>A</strong> = select / play</li>
+            <li><strong>B</strong> = back</li>
+            <li><strong>X</strong> = context menu</li>
+            <li><strong>Y</strong> = quick info</li>
+            <li><strong>Xbox button</strong> = open guide</li>
+            <li><strong>View / Menu</strong> = captures / options</li>
+            <li><strong>LB / RB</strong> = switch tab</li>
+        </ul>
+        <p>Open Settings → Controller in the dashboard to test rumble.</p>
+    </div>
+
+    <details class="card">
+        <summary>What if I want it to literally replace the Windows shell?</summary>
+        <p>Advanced — at your own risk. You can swap <code>explorer.exe</code> for the Xbox PC executable so Windows boots into the dashboard with no taskbar / desktop. Edit:</p>
+        <pre>HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\Shell</pre>
+        <p>Set <code>Shell</code> to the full path of <code>Xbox PC.exe</code>. Reboot. To revert, sign in via <kbd>Ctrl+Alt+Del → Task Manager → Run new task → explorer.exe</kbd> and change the value back. <em>This is a one-way trip if you don't know what you're doing — only do this on a machine you can reinstall.</em></p>
+    </details>
+
+    <a class="back" href="xbox.html">▶ Back to the dashboard</a>
+</div>
+
+<script>
+document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const id = btn.dataset.copy;
+        const text = document.getElementById(id).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const old = btn.textContent;
+            btn.textContent = "Copied!";
+            setTimeout(() => btn.textContent = old, 1200);
+        });
+    });
+});
+</script>
+</body>
+</html>

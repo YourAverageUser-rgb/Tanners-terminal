@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xbox PC — Tanner's Edition</title>
+    <link rel="stylesheet" href="xbox.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='11' fill='%23107C10'/><text x='12' y='17' text-anchor='middle' font-size='14' fill='white' font-family='Arial' font-weight='bold'>X</text></svg>">
+</head>
+<body data-theme="seriesx" data-mode="tv">
+
+<!-- Boot splash -->
+<div id="boot" class="boot">
+    <div class="boot-orb"></div>
+    <div class="boot-text">XBOX</div>
+    <div class="boot-sub">Tanner's Edition · PC</div>
+    <div class="boot-bar"><div class="boot-bar-fill"></div></div>
+</div>
+
+<!-- Top status bar -->
+<header id="topbar" class="topbar hidden">
+    <div class="topbar-left">
+        <div class="gamertag-chip" data-focus tabindex="0">
+            <div class="avatar" id="avatar">T</div>
+            <div class="gt">
+                <div class="gt-name" id="gtName">TannerPC</div>
+                <div class="gt-score">G <span id="gtScore">14,250</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="topbar-center">
+        <div class="net-pill"><span class="dot ok"></span><span id="netStatus">Connected · Xbox Live</span></div>
+    </div>
+    <div class="topbar-right">
+        <div class="dl-chip" id="dlChip" data-focus tabindex="0" hidden>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17.4l-4.7-4.7 1.4-1.4 3.3 3.3V3h2zM5 19h14v2H5z"/></svg>
+            <span id="dlChipText">2 downloads</span>
+        </div>
+        <div class="clock" id="clock">--:--</div>
+        <button class="icon-btn" id="btnGuide" data-focus title="Open Guide (Xbox button / Space)">
+            <span class="x-orb">X</span>
+        </button>
+    </div>
+</header>
+
+<!-- Vertical nav -->
+<nav id="sidebar" class="sidebar hidden">
+    <button class="nav-item active" data-focus data-page="home"><span class="ico">🏠</span><span class="lbl">Home</span></button>
+    <button class="nav-item" data-focus data-page="games"><span class="ico">🎮</span><span class="lbl">My library</span></button>
+    <button class="nav-item" data-focus data-page="store"><span class="ico">🛒</span><span class="lbl">Store</span></button>
+    <button class="nav-item" data-focus data-page="gamepass"><span class="ico">∞</span><span class="lbl">Game Pass</span></button>
+    <button class="nav-item" data-focus data-page="cloud"><span class="ico">☁︎</span><span class="lbl">Cloud Gaming</span></button>
+    <button class="nav-item" data-focus data-page="friends"><span class="ico">👥</span><span class="lbl">Friends</span></button>
+    <button class="nav-item" data-focus data-page="parties"><span class="ico">🎧</span><span class="lbl">Parties</span></button>
+    <button class="nav-item" data-focus data-page="messages"><span class="ico">✉</span><span class="lbl">Messages <span class="badge" id="msgBadge">3</span></span></button>
+    <button class="nav-item" data-focus data-page="achievements"><span class="ico">🏆</span><span class="lbl">Achievements</span></button>
+    <button class="nav-item" data-focus data-page="captures"><span class="ico">📸</span><span class="lbl">Captures</span></button>
+    <button class="nav-item" data-focus data-page="settings"><span class="ico">⚙</span><span class="lbl">Settings</span></button>
+</nav>
+
+<!-- Main content area -->
+<main id="content" class="content hidden">
+
+    <!-- HOME -->
+    <section class="page active" data-page="home">
+        <div class="hero" id="heroBlock">
+            <div class="hero-bg" id="heroBg"></div>
+            <div class="hero-meta">
+                <div class="hero-tag">RECENTLY PLAYED</div>
+                <h1 class="hero-title" id="heroTitle">Forza Horizon 5</h1>
+                <div class="hero-sub" id="heroSub">Resume your last session · 38h played</div>
+                <div class="hero-actions">
+                    <button class="btn primary" data-focus id="heroPlay">▶ Play</button>
+                    <button class="btn ghost" data-focus id="heroDetails">Details</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Jump back in</h2>
+            <div class="tile-row" id="recentRow"></div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Friends who are online</h2>
+            <div class="friend-row" id="friendRow"></div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Game Pass · Recently added</h2>
+            <div class="tile-row" id="gamepassRow"></div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Recent achievements</h2>
+            <div class="ach-row" id="achievementsRow"></div>
+        </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section class="page" data-page="games">
+        <div class="page-head">
+            <h1>My library</h1>
+            <div class="sub">
+                <span id="libCount">— games</span> ·
+                <button class="link" data-focus id="rescanBtn">↻ Rescan now</button> ·
+                <span id="lastScan">Last scan: never</span>
+            </div>
+            <div class="filters" id="libFilters">
+                <button class="chip active" data-focus data-filter="all">All</button>
+                <button class="chip" data-focus data-filter="installed">Installed</button>
+                <button class="chip" data-focus data-filter="downloading">Downloading</button>
+                <button class="chip" data-focus data-filter="cloud">Cloud</button>
+                <button class="chip" data-focus data-filter="ready">Ready to install</button>
+            </div>
+        </div>
+        <div class="grid" id="libraryGrid"></div>
+    </section>
+
+    <!-- STORE -->
+    <section class="page" data-page="store">
+        <div class="page-head">
+            <h1>Microsoft Store</h1>
+            <div class="sub">Buy games, install from the cloud · Synced to your Xbox account</div>
+        </div>
+        <div class="grid" id="storeGrid"></div>
+    </section>
+
+    <!-- GAME PASS -->
+    <section class="page" data-page="gamepass">
+        <div class="page-head">
+            <h1>Game Pass <span class="pill green">Ultimate</span></h1>
+            <div class="sub">Hundreds of games. Day-one releases. Install on PC.</div>
+        </div>
+        <div class="grid" id="passGrid"></div>
+    </section>
+
+    <!-- CLOUD GAMING -->
+    <section class="page" data-page="cloud">
+        <div class="page-head">
+            <h1>Cloud Gaming <span class="pill">Beta</span></h1>
+            <div class="sub">Stream from Xbox servers · Works with controller</div>
+        </div>
+        <div class="grid" id="cloudGrid"></div>
+    </section>
+
+    <!-- FRIENDS -->
+    <section class="page" data-page="friends">
+        <div class="page-head">
+            <h1>Friends</h1>
+            <div class="sub"><span id="friendsOnlineCount">—</span> online of <span id="friendsTotalCount">—</span></div>
+            <div class="filters">
+                <button class="chip active" data-focus data-friend-filter="online">Online</button>
+                <button class="chip" data-focus data-friend-filter="all">All</button>
+                <button class="chip" data-focus data-friend-filter="ingame">In game</button>
+                <button class="chip" data-focus data-friend-filter="party">In party</button>
+            </div>
+        </div>
+        <div class="friend-list" id="friendList"></div>
+    </section>
+
+    <!-- PARTIES -->
+    <section class="page" data-page="parties">
+        <div class="page-head">
+            <h1>Party</h1>
+            <div class="sub" id="partySubtitle">Voice chat with up to 16 friends</div>
+        </div>
+        <div class="party-shell">
+            <div class="party-card" id="partyCard">
+                <div id="partyEmpty">
+                    <p>You're not in a party.</p>
+                    <button class="btn primary" data-focus id="startPartyBtn">Start a party</button>
+                </div>
+                <div id="partyActive" hidden>
+                    <div class="party-head">
+                        <div>
+                            <div class="muted">Party · <span id="partyCount">1</span> of 16</div>
+                            <h2 id="partyName">Tanner's Party</h2>
+                        </div>
+                        <div class="party-controls">
+                            <button class="btn ghost" data-focus id="muteBtn">🎙 Mute</button>
+                            <button class="btn ghost" data-focus id="deafenBtn">🎧 Deafen</button>
+                            <button class="btn danger" data-focus id="leavePartyBtn">Leave</button>
+                        </div>
+                    </div>
+                    <ul class="party-members" id="partyMembers"></ul>
+                    <div class="party-invite">
+                        <button class="btn primary" data-focus id="inviteFriendsBtn">+ Invite friends</button>
+                        <button class="btn ghost" data-focus id="partyChatBtn">💬 Party chat</button>
+                    </div>
+                </div>
+            </div>
+            <div class="invite-side">
+                <h3>Invite a friend</h3>
+                <ul class="invite-list" id="inviteList"></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- MESSAGES -->
+    <section class="page" data-page="messages">
+        <div class="page-head">
+            <h1>Messages</h1>
+            <div class="sub">Direct messages and party invites</div>
+        </div>
+        <div class="msg-shell">
+            <aside class="msg-list" id="msgList"></aside>
+            <section class="msg-thread" id="msgThread">
+                <div class="msg-empty">Pick a conversation</div>
+            </section>
+        </div>
+    </section>
+
+    <!-- ACHIEVEMENTS -->
+    <section class="page" data-page="achievements">
+        <div class="page-head">
+            <h1>Achievements</h1>
+            <div class="sub">Gamerscore <span id="gsTotal">14,250</span> · <span id="achCount">—</span> unlocked</div>
+        </div>
+        <div class="ach-list" id="achList"></div>
+    </section>
+
+    <!-- CAPTURES -->
+    <section class="page" data-page="captures">
+        <div class="page-head">
+            <h1>Captures</h1>
+            <div class="sub">Screenshots and clips · Press LB+View on controller</div>
+        </div>
+        <div class="capture-grid" id="captureGrid"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" data-page="settings">
+        <div class="page-head">
+            <h1>Settings</h1>
+        </div>
+
+        <div class="settings-grid">
+
+            <div class="setting-card">
+                <h3>Dashboard version</h3>
+                <p class="muted">Switch between Xbox dashboard generations.</p>
+                <div class="seg" id="themeSeg">
+                    <button class="seg-btn active" data-focus data-theme="seriesx">Series X|S (current)</button>
+                    <button class="seg-btn" data-focus data-theme="xboxone">Xbox One (2013)</button>
+                    <button class="seg-btn" data-focus data-theme="x360">Xbox 360 (Blade)</button>
+                    <button class="seg-btn" data-focus data-theme="original">Original Xbox</button>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h3>Display mode</h3>
+                <p class="muted">TV mode is the full Xbox experience. PC mode trims for desktop.</p>
+                <div class="seg" id="modeSeg">
+                    <button class="seg-btn active" data-focus data-mode="tv">TV mode</button>
+                    <button class="seg-btn" data-focus data-mode="pc">PC windowed</button>
+                </div>
+                <div class="setting-actions">
+                    <button class="btn ghost" data-focus id="btnFullscreen">⛶ Fullscreen</button>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h3>Boot Xbox when PC starts</h3>
+                <p class="muted">Set this dashboard to launch on Windows sign-in so your PC boots straight into Xbox.</p>
+                <div class="setting-actions">
+                    <a class="btn primary" href="autostart.html" data-focus>📖 Open setup guide</a>
+                    <button class="btn ghost" data-focus id="btnCopyShortcut">📋 Copy startup command</button>
+                </div>
+                <div class="kv">
+                    <div class="k">Status</div>
+                    <div class="v" id="autostartStatus">Not configured (browser can't detect)</div>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h3>Controller</h3>
+                <p class="muted">Plug in an Xbox / compatible gamepad. The dashboard maps to the same buttons as a console.</p>
+                <div class="kv">
+                    <div class="k">Detected</div>
+                    <div class="v" id="padStatus">No controller</div>
+                </div>
+                <div class="kv">
+                    <div class="k">Vibration test</div>
+                    <div class="v"><button class="btn ghost" data-focus id="btnRumble">Rumble</button></div>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h3>Keyboard mapping</h3>
+                <p class="muted">Use these when no controller is attached.</p>
+                <table class="kbd-map">
+                    <tr><th>Action</th><th>Controller</th><th>Keyboard</th></tr>
+                    <tr><td>Navigate</td><td>D-Pad / Left Stick</td><td>Arrows / WASD</td></tr>
+                    <tr><td>Select / Play</td><td>A</td><td>Enter</td></tr>
+                    <tr><td>Back</td><td>B</td><td>Esc / Backspace</td></tr>
+                    <tr><td>Context menu</td><td>X</td><td>Q</td></tr>
+                    <tr><td>Quick info</td><td>Y</td><td>E</td></tr>
+                    <tr><td>Guide</td><td>Xbox button</td><td>Space</td></tr>
+                    <tr><td>View / Captures</td><td>View</td><td>Tab</td></tr>
+                    <tr><td>Menu</td><td>Menu</td><td>Shift+Tab</td></tr>
+                    <tr><td>Switch tab</td><td>LB / RB</td><td>1 / 2</td></tr>
+                </table>
+            </div>
+
+            <div class="setting-card">
+                <h3>Library scanning</h3>
+                <p class="muted">Auto-scan looks for new Xbox app installs. In-browser this is simulated — wire it to your Electron/Tauri build to scan real paths.</p>
+                <div class="kv">
+                    <div class="k">Auto-scan on close</div>
+                    <div class="v"><label class="switch"><input type="checkbox" id="toggleScan" checked><span></span></label></div>
+                </div>
+                <div class="kv">
+                    <div class="k">Scan interval</div>
+                    <div class="v">
+                        <select id="scanInterval" data-focus>
+                            <option value="60">Every 1 min</option>
+                            <option value="300" selected>Every 5 min</option>
+                            <option value="900">Every 15 min</option>
+                            <option value="0">Disabled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="setting-actions">
+                    <button class="btn primary" data-focus id="forceScan">Scan now</button>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h3>Profile</h3>
+                <div class="kv"><div class="k">Gamertag</div><div class="v"><input id="inpGT" value="TannerPC"></div></div>
+                <div class="kv"><div class="k">Real name</div><div class="v"><input id="inpName" value="Tanner"></div></div>
+                <div class="setting-actions">
+                    <button class="btn primary" data-focus id="saveProfile">Save</button>
+                    <button class="btn ghost" data-focus id="resetAll">Reset all data</button>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h3>About</h3>
+                <p class="muted">Xbox PC — Tanner's Edition</p>
+                <p class="muted">Web build · build <span id="buildId">2026.05</span></p>
+                <p class="muted">A fan-made Xbox-style launcher for PC. Not affiliated with Microsoft.</p>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<!-- GUIDE (Xbox button overlay) -->
+<div id="guide" class="guide" hidden>
+    <div class="guide-panel">
+        <div class="guide-head">
+            <div class="avatar lg" id="guideAvatar">T</div>
+            <div>
+                <div class="g-name" id="guideName">TannerPC</div>
+                <div class="g-status">Online · <span id="guideStatus">Home</span></div>
+            </div>
+            <button class="icon-btn close" data-focus id="closeGuide">✕</button>
+        </div>
+        <div class="guide-tabs">
+            <button class="g-tab active" data-focus data-gtab="home">Home</button>
+            <button class="g-tab" data-focus data-gtab="party">Party</button>
+            <button class="g-tab" data-focus data-gtab="friends">Friends</button>
+            <button class="g-tab" data-focus data-gtab="messages">Messages</button>
+            <button class="g-tab" data-focus data-gtab="capture">Capture</button>
+            <button class="g-tab" data-focus data-gtab="power">Power</button>
+        </div>
+        <div class="guide-body" id="guideBody"></div>
+        <div class="guide-hints">
+            <span><span class="kbd">A</span> Select</span>
+            <span><span class="kbd">B</span> Back</span>
+            <span><span class="kbd">LB/RB</span> Switch tab</span>
+            <span><span class="kbd">Xbox</span> Close</span>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toastWrap" class="toast-wrap"></div>
+
+<!-- Pad visual / input layer (debug-able) -->
+<div id="padHint" class="pad-hint" hidden>
+    <span class="dot ok"></span> Controller connected
+</div>
+
+<script src="xbox-data.js"></script>
+<script src="xbox-input.js"></script>
+<script src="xbox.js"></script>
+</body>
+</html>
