@@ -1,0 +1,51 @@
+{
+  "name": "xbox-pc-tanners-edition",
+  "version": "1.0.0",
+  "description": "Xbox-style dashboard and game launcher for Windows. Real game scanning, real Xbox app integration, runs at PC boot.",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win nsis portable",
+    "pack": "electron-builder --dir"
+  },
+  "build": {
+    "appId": "com.tanner.xboxpc",
+    "productName": "Xbox PC",
+    "copyright": "Tanner's Edition — Fan-made, not affiliated with Microsoft",
+    "directories": { "output": "dist" },
+    "files": [
+      "electron/**/*",
+      "docs/**/*",
+      "package.json",
+      "!**/*.md"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        { "target": "nsis",     "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "electron/icon.png",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Xbox PC",
+      "uninstallDisplayName": "Xbox PC — Tanner's Edition"
+    },
+    "portable": {
+      "artifactName": "Xbox-PC-portable.exe"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}

@@ -40,6 +40,11 @@
         <button class="icon-btn" id="btnGuide" data-focus title="Open Guide (Xbox button / Space)">
             <span class="x-orb">X</span>
         </button>
+        <div class="window-controls" id="windowControls" hidden>
+            <button class="win-btn" id="winMin"  title="Minimize">—</button>
+            <button class="win-btn" id="winMax"  title="Maximize">▢</button>
+            <button class="win-btn close" id="winClose" title="Close to tray">✕</button>
+        </div>
     </div>
 </header>
 
@@ -55,6 +60,7 @@
     <button class="nav-item" data-focus data-page="messages"><span class="ico">✉</span><span class="lbl">Messages <span class="badge" id="msgBadge">3</span></span></button>
     <button class="nav-item" data-focus data-page="achievements"><span class="ico">🏆</span><span class="lbl">Achievements</span></button>
     <button class="nav-item" data-focus data-page="captures"><span class="ico">📸</span><span class="lbl">Captures</span></button>
+    <button class="nav-item" data-focus data-page="tools"><span class="ico">🛠</span><span class="lbl">Xbox Tools <span class="pill green" id="nativeBadge" style="display:none">PC</span></span></button>
     <button class="nav-item" data-focus data-page="settings"><span class="ico">⚙</span><span class="lbl">Settings</span></button>
 </nav>
 
@@ -229,6 +235,204 @@
         <div class="capture-grid" id="captureGrid"></div>
     </section>
 
+    <!-- XBOX TOOLS -->
+    <section class="page" data-page="tools">
+        <div class="page-head">
+            <h1>Xbox Tools <span class="pill green" id="modeBadge">Web</span></h1>
+            <div class="sub">One-click shortcuts to every Xbox + Game Pass + Windows gaming tool. <span id="electronHint" hidden>Running natively as a Windows app — full integrations active.</span><span id="webHint">Install the Windows build for one-click launching of these tools.</span></div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Xbox app</h2>
+            <div class="tools-grid">
+                <button class="tool-card" data-focus data-tool="xbox-app">
+                    <div class="t-ico">🎮</div>
+                    <div class="t-title">Open Xbox App</div>
+                    <div class="t-sub">Library · downloads · cloud play</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="game-pass">
+                    <div class="t-ico">∞</div>
+                    <div class="t-title">Game Pass</div>
+                    <div class="t-sub">Browse Ultimate library</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="gp-pc-library">
+                    <div class="t-ico">💾</div>
+                    <div class="t-title">PC Game Pass Library</div>
+                    <div class="t-sub">xbox.com/play/library</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="gp-cloud">
+                    <div class="t-ico">☁︎</div>
+                    <div class="t-title">Cloud Gaming</div>
+                    <div class="t-sub">Stream from Xbox servers</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="ms-store">
+                    <div class="t-ico">🛒</div>
+                    <div class="t-title">Microsoft Store</div>
+                    <div class="t-sub">Buy games and add-ons</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="redeem-code">
+                    <div class="t-ico">🎟</div>
+                    <div class="t-title">Redeem Code</div>
+                    <div class="t-sub">Cards, Game Pass, gift codes</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Game Bar &amp; Captures</h2>
+            <div class="tools-grid">
+                <button class="tool-card" data-focus data-tool="game-bar">
+                    <div class="t-ico">📋</div>
+                    <div class="t-title">Open Game Bar</div>
+                    <div class="t-sub">Win+G overlay · capture, perf, audio</div>
+                </button>
+                <button class="tool-card" data-focus data-action="screenshot">
+                    <div class="t-ico">📸</div>
+                    <div class="t-title">Take Screenshot</div>
+                    <div class="t-sub">Save to Pictures/Xbox PC Captures</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="capture-folder">
+                    <div class="t-ico">📁</div>
+                    <div class="t-title">Captures Folder</div>
+                    <div class="t-sub">Videos/Captures · clips &amp; recordings</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="screenshot-folder">
+                    <div class="t-ico">🖼</div>
+                    <div class="t-title">Screenshots Folder</div>
+                    <div class="t-sub">Pictures/Screenshots</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="xbox-captures-folder">
+                    <div class="t-ico">📂</div>
+                    <div class="t-title">Xbox PC Captures</div>
+                    <div class="t-sub">Your dashboard captures</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="settings-captures">
+                    <div class="t-ico">⚙</div>
+                    <div class="t-title">Capture Settings</div>
+                    <div class="t-sub">Game DVR, hotkeys, quality</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Friends, Account &amp; Rewards</h2>
+            <div class="tools-grid">
+                <button class="tool-card" data-focus data-tool="xbox-account">
+                    <div class="t-ico">👤</div>
+                    <div class="t-title">Xbox Profile</div>
+                    <div class="t-sub">account.xbox.com</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="xbox-friends">
+                    <div class="t-ico">👥</div>
+                    <div class="t-title">Xbox Friends</div>
+                    <div class="t-sub">Find &amp; manage friends online</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="xbox-rewards">
+                    <div class="t-ico">🎁</div>
+                    <div class="t-title">Microsoft Rewards</div>
+                    <div class="t-sub">Earn points for Game Pass</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="open-game-pass-quests">
+                    <div class="t-ico">⭐</div>
+                    <div class="t-title">Game Pass Quests</div>
+                    <div class="t-sub">Weekly &amp; monthly challenges</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="open-xbox-insider">
+                    <div class="t-ico">🧪</div>
+                    <div class="t-title">Xbox Insider</div>
+                    <div class="t-sub">Preview features early</div>
+                </button>
+                <button class="tool-card" data-focus data-action="rescan">
+                    <div class="t-ico">🔍</div>
+                    <div class="t-title">Rescan Installed Games</div>
+                    <div class="t-sub">Read Xbox app, UWP, Steam, Epic</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Windows gaming settings</h2>
+            <div class="tools-grid">
+                <button class="tool-card" data-focus data-tool="settings-game-bar">
+                    <div class="t-ico">🎚</div>
+                    <div class="t-title">Game Bar Settings</div>
+                    <div class="t-sub">Hotkeys &amp; widgets</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="settings-game-mode">
+                    <div class="t-ico">🚀</div>
+                    <div class="t-title">Game Mode</div>
+                    <div class="t-sub">Optimize Windows for gaming</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="settings-controller">
+                    <div class="t-ico">🎮</div>
+                    <div class="t-title">Bluetooth &amp; Controllers</div>
+                    <div class="t-sub">Pair your Xbox controller</div>
+                </button>
+                <button class="tool-card" data-focus data-tool="task-manager">
+                    <div class="t-ico">📊</div>
+                    <div class="t-title">Task Manager</div>
+                    <div class="t-sub">Performance &amp; processes</div>
+                </button>
+                <button class="tool-card" data-focus data-action="fullscreen">
+                    <div class="t-ico">⛶</div>
+                    <div class="t-title">Toggle Fullscreen</div>
+                    <div class="t-sub">True Xbox console mode</div>
+                </button>
+                <button class="tool-card" data-focus data-action="quit-to-desktop">
+                    <div class="t-ico">🖥</div>
+                    <div class="t-title">Quit to Desktop</div>
+                    <div class="t-sub">Close Xbox dashboard</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">PC performance</h2>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-label">CPU usage</div>
+                    <div class="stat-value" id="statCpu">—</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" id="statCpuBar"></div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Memory</div>
+                    <div class="stat-value" id="statMem">—</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" id="statMemBar"></div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Uptime</div>
+                    <div class="stat-value" id="statUptime">—</div>
+                    <div class="stat-sub" id="statUptimeSub">since last boot</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">CPU</div>
+                    <div class="stat-value sm" id="statCpuModel">—</div>
+                    <div class="stat-sub" id="statCpuCores">— cores</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total RAM</div>
+                    <div class="stat-value" id="statRamTotal">—</div>
+                    <div class="stat-sub">installed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Windows user</div>
+                    <div class="stat-value sm" id="statUser">—</div>
+                    <div class="stat-sub" id="statHost">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <h2 class="row-title">Detected libraries</h2>
+            <div class="lib-sources" id="libSources">
+                <div class="lib-src"><span class="lib-name">Xbox app</span><span class="lib-count" id="cntXbox">—</span></div>
+                <div class="lib-src"><span class="lib-name">Game Pass UWP</span><span class="lib-count" id="cntUwp">—</span></div>
+                <div class="lib-src"><span class="lib-name">Steam</span><span class="lib-count" id="cntSteam">—</span></div>
+                <div class="lib-src"><span class="lib-name">Epic Games</span><span class="lib-count" id="cntEpic">—</span></div>
+            </div>
+        </div>
+    </section>
+
     <!-- SETTINGS -->
     <section class="page" data-page="settings">
         <div class="page-head">
@@ -270,6 +474,14 @@
                 <div class="kv">
                     <div class="k">Status</div>
                     <div class="v" id="autostartStatus">Not configured (browser can't detect)</div>
+                </div>
+                <div class="kv" id="nativeAutostartRow" hidden>
+                    <div class="k">Boot Xbox dashboard with Windows</div>
+                    <div class="v"><label class="switch"><input type="checkbox" id="toggleAutostart"><span></span></label></div>
+                </div>
+                <div class="kv" id="nativeHotkeyRow" hidden>
+                    <div class="k">Global hotkey</div>
+                    <div class="v"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd> — bring dashboard forward from anywhere in Windows</div>
                 </div>
             </div>
 

@@ -572,6 +572,82 @@ a { color: inherit; text-decoration: none; }
     font-size: 11px;
 }
 
+/* ============== WINDOW CONTROLS (Electron frameless) ============== */
+.window-controls { display: flex; gap: 4px; margin-left: 4px; }
+.win-btn {
+    width: 36px; height: 32px;
+    background: transparent; border: none; color: var(--xtext);
+    cursor: pointer; border-radius: 6px;
+    font-size: 14px;
+    transition: background .12s;
+}
+.win-btn:hover { background: var(--xpanel2); }
+.win-btn.close:hover { background: #b91c1c; color: white; }
+body[data-electron="true"] .topbar { -webkit-app-region: drag; }
+body[data-electron="true"] .topbar button,
+body[data-electron="true"] .topbar .gamertag-chip,
+body[data-electron="true"] .topbar .net-pill,
+body[data-electron="true"] .topbar .dl-chip,
+body[data-electron="true"] .topbar .clock { -webkit-app-region: no-drag; }
+
+/* ============== XBOX TOOLS PAGE ============== */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+.tool-card {
+    background: var(--xpanel);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: var(--xradius-sm);
+    padding: 16px;
+    color: var(--xtext);
+    text-align: left;
+    cursor: pointer;
+    transition: transform .12s, background .12s, border-color .12s;
+    display: flex; flex-direction: column; gap: 4px;
+    font: inherit;
+}
+.tool-card:hover {
+    background: var(--xpanel2);
+    border-color: rgba(22,198,12,0.4);
+    transform: translateY(-2px);
+}
+.tool-card .t-ico { font-size: 28px; margin-bottom: 6px; }
+.tool-card .t-title { font-weight: 600; font-size: 15px; }
+.tool-card .t-sub { font-size: 12px; color: var(--xtext-dim); }
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+.stat-card {
+    background: var(--xpanel);
+    border-radius: var(--xradius-sm);
+    padding: 16px;
+}
+.stat-label { font-size: 12px; color: var(--xtext-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-value { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat-value.sm { font-size: 14px; line-height: 1.3; word-break: break-word; font-weight: 500; }
+.stat-sub { font-size: 11px; color: var(--xtext-dim); margin-top: 4px; }
+.stat-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.stat-bar-fill { height: 100%; background: var(--xgreen-bright); width: 0%; transition: width .4s ease; }
+
+.lib-sources {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+}
+.lib-src {
+    background: var(--xpanel);
+    border-radius: var(--xradius-sm);
+    padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.lib-name { color: var(--xtext-dim); font-size: 13px; }
+.lib-count { font-size: 22px; font-weight: 700; color: var(--xgreen-bright); font-variant-numeric: tabular-nums; }
+
 /* ============== SCROLLBARS ============== */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }

@@ -80,6 +80,21 @@
         $('#sidebar').classList.remove('hidden');
         $('#content').classList.remove('hidden');
 
+        // Electron detection
+        if (window.XboxNative && window.XboxNative.isElectron) {
+            document.body.dataset.electron = "true";
+            $('#windowControls').hidden = false;
+            $('#nativeBadge').style.display = "inline-block";
+            $('#modeBadge').textContent = "Native · Windows";
+            $('#modeBadge').classList.add('green');
+            $('#electronHint').hidden = false;
+            $('#webHint').hidden = true;
+            $('#nativeAutostartRow').hidden = false;
+            $('#nativeHotkeyRow').hidden = false;
+            bindWindowControls();
+            bindNativeBridge();
+        }
+
         applyTheme(state.theme);
         applyMode(state.mode);
 
@@ -113,6 +128,8 @@
         renderMessages();
         renderAchievements();
         renderCaptures();
+        renderTools();
+        bindTools();
 
         navigate(state.page, true);
         startClock();
@@ -308,8 +325,22 @@
     }
 
     function playGame(g) {
-        toast("Launching " + g.title, "On a real install this hands off to the Xbox app to run the game.");
-        XboxInput.rumble(0.6, 0.6, 400);
+        if (window.XboxNative && g.native) {
+            toast("Launching " + g.title, "Starting via " + g.native.source);
+            XboxInput.rumble(0.7, 0.7, 500);
+            XboxNative.launchGame(g.native).then(res => {
+                if (!res || !res.ok) {
+                    toast("Couldn't launch", res && res.reason || "no launch method available");
+                } else {
+                    XboxNative.notify && XboxNative.notify("Playing " + g.title, "Launched from " + g.native.source);
+                }
+            });
+        } else {
+            toast("Launching " + g.title, window.XboxNative
+                ? "Simulated launch — game has no native install path."
+                : "Install the Windows build to launch real games.");
+            XboxInput.rumble(0.6, 0.6, 400);
+        }
         g.hours = (g.hours || 0) + 1;
         saveGameOverrides();
         renderHome(); renderLibrary();
@@ -856,6 +887,7 @@
         });
     }
     function runScan() {
+        if (window.XboxNative) { doNativeScan(); return; }
         state.lastScan = nowLabel();
         saveGameOverrides();
         // 25% chance a "new" install appears (cycles through ready-list)
@@ -882,5 +914,220 @@
         return String(s || "").replace(/[&<>"']/g, c => ({
             "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
         }[c]));
+    }
+    function fmtBytes(n) {
+        if (!n) return "0 B";
+        const u = ["B","KB","MB","GB","TB"];
+        let i = 0;
+        while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+        return n.toFixed(n < 10 ? 1 : 0) + " " + u[i];
+    }
+    function fmtUptime(s) {
+        if (!s) return "—";
+        const d = Math.floor(s / 86400);
+        const h = Math.floor((s % 86400) / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        if (d) return `${d}d ${h}h`;
+        if (h) return `${h}h ${m}m`;
+        return `${m}m`;
+    }
+
+    // ---------- Electron window controls ----------
+    function bindWindowControls() {
+        $('#winMin')  .addEventListener('click', () => XboxNative.window.minimize());
+        $('#winMax')  .addEventListener('click', () => XboxNative.window.maximize());
+        $('#winClose').addEventListener('click', () => XboxNative.window.close());
+    }
+
+    // ---------- Native bridge: autostart, scan, launch ----------
+    function bindNativeBridge() {
+        // Autostart toggle
+        XboxNative.autostart.get().then(s => {
+            $('#toggleAutostart').checked = !!s.openAtLogin;
+            $('#autostartStatus').textContent = s.openAtLogin
+                ? "Enabled · launches at Windows login"
+                : "Disabled";
+        });
+        $('#toggleAutostart').addEventListener('change', async (e) => {
+            const s = await XboxNative.autostart.set(e.target.checked);
+            $('#autostartStatus').textContent = s.openAtLogin
+                ? "Enabled · launches at Windows login"
+                : "Disabled";
+            toast("Boot setting saved", s.openAtLogin
+                ? "Xbox dashboard will launch on Windows login."
+                : "Autostart disabled.");
+        });
+
+        // Tray actions push through preload
+        XboxNative.on('action', (which) => {
+            if (which === 'screenshot') takeNativeScreenshot();
+            if (which === 'scan') doNativeScan();
+        });
+
+        // System stats loop (when on Tools page)
+        setInterval(() => {
+            if (state.page === 'tools') refreshStats();
+        }, 2000);
+        // First load
+        XboxNative.systemInfo().then(info => {
+            $('#statCpuModel').textContent = (info.cpuModel || "—").replace(/\s+/g, " ").trim();
+            $('#statCpuCores').textContent = `${info.cpus} cores · ${info.arch}`;
+            $('#statRamTotal').textContent = fmtBytes(info.totalMem);
+            $('#statUser').textContent = info.username || "—";
+            $('#statHost').textContent = `${info.platform} ${info.release}`;
+        });
+
+        // Initial native scan
+        doNativeScan({ silent: true });
+    }
+    function refreshStats() {
+        XboxNative.systemStats().then(s => {
+            $('#statCpu').textContent = s.cpuPct + "%";
+            $('#statCpuBar').style.width = s.cpuPct + "%";
+            $('#statMem').textContent = s.memPct + "%";
+            $('#statMemBar').style.width = s.memPct + "%";
+            $('#statUptime').textContent = fmtUptime(s.uptime);
+        });
+    }
+
+    async function takeNativeScreenshot() {
+        if (!window.XboxNative) {
+            toast("Screenshot", "Install the Windows build for native screenshots.");
+            return;
+        }
+        const file = await XboxNative.screenshot();
+        if (file) {
+            toast("Screenshot saved", file);
+            XboxNative.notify && XboxNative.notify("Screenshot saved", file);
+        } else {
+            toast("Screenshot failed", "Could not capture the screen.");
+        }
+    }
+
+    async function doNativeScan(opts) {
+        opts = opts || {};
+        if (!window.XboxNative) return;
+        let games;
+        try { games = await XboxNative.scanInstalled(); }
+        catch (e) { games = []; }
+        if (!Array.isArray(games)) games = [];
+
+        // Update counts
+        const groups = { xboxapp: 0, uwp: 0, steam: 0, epic: 0 };
+        for (const g of games) if (groups[g.source] !== undefined) groups[g.source]++;
+        $('#cntXbox').textContent  = groups.xboxapp;
+        $('#cntUwp').textContent   = groups.uwp;
+        $('#cntSteam').textContent = groups.steam;
+        $('#cntEpic').textContent  = groups.epic;
+
+        // Merge into library (preserve existing simulated downloads)
+        const existingIds = new Set(state.games.map(g => g.id));
+        for (const g of games) {
+            const id = `native:${g.id}`;
+            if (existingIds.has(id)) continue;
+            state.games.push({
+                id,
+                title: g.title,
+                studio: g.source === 'xboxapp' ? 'Xbox app' :
+                        g.source === 'uwp'     ? 'Game Pass · UWP' :
+                        g.source === 'steam'   ? 'Steam' :
+                        g.source === 'epic'    ? 'Epic Games' : g.source,
+                size: g.sizeBytes ? Math.round(g.sizeBytes / 1e9) : 0,
+                hours: 0,
+                state: 'installed',
+                native: g,
+                art: XboxData.art(g.title.slice(0, 22), '#107C10', '#0d660d', '#9bf76b')
+            });
+        }
+        state.lastScan = nowLabel();
+        saveGameOverrides();
+        renderLibrary();
+        renderHome();
+
+        if (!opts.silent) {
+            const total = games.length;
+            toast(`Found ${total} installed game${total === 1 ? "" : "s"}`,
+                  `Xbox app: ${groups.xboxapp} · UWP: ${groups.uwp} · Steam: ${groups.steam} · Epic: ${groups.epic}`);
+            XboxNative.notify && XboxNative.notify("Library scan complete", `${total} installed games found.`);
+        }
+    }
+
+    // ---------- Tools page ----------
+    function renderTools() {
+        // Static content already in HTML — just static counts default
+        if (!window.XboxNative) {
+            $('#cntXbox').textContent = "—";
+            $('#cntUwp').textContent  = "—";
+            $('#cntSteam').textContent = "—";
+            $('#cntEpic').textContent = "—";
+            $('#statCpu').textContent = "n/a";
+            $('#statMem').textContent = "n/a";
+            $('#statUptime').textContent = "n/a";
+            $('#statCpuModel').textContent = "Browser sandbox";
+            $('#statCpuCores').textContent = (navigator.hardwareConcurrency || "?") + " logical cores";
+            $('#statRamTotal').textContent = "n/a";
+            $('#statUser').textContent = "Web mode";
+            $('#statHost').textContent = navigator.platform || "browser";
+        }
+    }
+    function bindTools() {
+        $$('.tool-card[data-tool]').forEach(el => {
+            el.addEventListener('click', () => handleToolClick(el.dataset.tool, el));
+        });
+        $$('.tool-card[data-action]').forEach(el => {
+            el.addEventListener('click', () => handleToolAction(el.dataset.action));
+        });
+    }
+    function handleToolClick(tool, el) {
+        const label = $('.t-title', el)?.textContent || tool;
+        if (window.XboxNative) {
+            XboxNative.openTool(tool).then(res => {
+                if (res && res.ok) {
+                    toast("Launching " + label, "Opening in Windows...");
+                } else {
+                    toast(label, "Couldn't launch: " + (res && res.reason || "unknown"));
+                }
+            });
+        } else {
+            // Web fallback — open the web equivalent
+            const webMap = {
+                'xbox-app':           'https://www.xbox.com/en-us/apps/xbox-app-for-pc',
+                'game-pass':          'https://www.xbox.com/en-US/xbox-game-pass',
+                'gp-pc-library':      'https://www.xbox.com/play/library',
+                'gp-cloud':           'https://www.xbox.com/play',
+                'ms-store':           'https://apps.microsoft.com/',
+                'xbox-account':       'https://account.xbox.com/profile',
+                'xbox-friends':       'https://account.xbox.com/social',
+                'xbox-rewards':       'https://rewards.bing.com/',
+                'open-xbox-insider':  'https://www.xbox.com/insider',
+                'open-game-pass-quests':'https://www.xbox.com/play/quests',
+                'redeem-code':        'https://account.microsoft.com/billing/redeem',
+                'game-bar':           'https://support.microsoft.com/topic/d8d03571-c5e0-b2dc-2c0a-c4eee9b1d4f0',
+                'capture-folder':     null, 'screenshot-folder': null, 'xbox-captures-folder': null,
+                'settings-captures':  null, 'settings-game-bar': null, 'settings-game-mode': null,
+                'settings-controller':null, 'task-manager':      null
+            };
+            const url = webMap[tool];
+            if (url) {
+                window.open(url, "_blank");
+            } else {
+                toast(label, "This tool needs the Windows build of Xbox PC.");
+            }
+        }
+    }
+    function handleToolAction(action) {
+        if (action === 'screenshot')      takeNativeScreenshot();
+        else if (action === 'rescan')     window.XboxNative ? doNativeScan() : runScan();
+        else if (action === 'fullscreen') {
+            if (window.XboxNative) XboxNative.window.fullscreen();
+            else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+        }
+        else if (action === 'quit-to-desktop') {
+            if (window.XboxNative) {
+                if (confirm("Quit Xbox PC to desktop?")) XboxNative.window.quit();
+            } else {
+                toast("Quit", "Only available in the Windows build.");
+            }
+        }
     }
 })();
